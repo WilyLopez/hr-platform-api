@@ -88,6 +88,17 @@ USE_TZ = True
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+MIGRATION_MODULES = {
+    'usuario': 'modules.usuario.infrastructure.migrations',
+    'empresa': 'modules.empresa.infrastructure.migrations',
+    'empleado': 'modules.empleado.infrastructure.migrations',
+    'asistencia': 'modules.asistencia.infrastructure.migrations',
+    'solicitud': 'modules.solicitud.infrastructure.migrations',
+    'auditoria': 'modules.auditoria.infrastructure.migrations',
+    'notificacion': 'modules.notificacion.infrastructure.migrations',
+    'suscripcion': 'modules.suscripcion.infrastructure.migrations',
+}
+
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
