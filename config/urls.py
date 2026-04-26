@@ -1,14 +1,18 @@
 from django.contrib import admin
 from django.urls import path, include
 
+api_v1_patterns = [
+    path('auth/', include('modules.usuario.interfaces.urls')),
+    path('empresas/', include('modules.empresa.interfaces.urls')),
+    path('empleados/', include('modules.empleado.interfaces.urls')),
+    path('asistencia/', include('modules.asistencia.interfaces.urls')),
+    path('solicitudes/', include('modules.solicitud.interfaces.urls')),
+    path('auditoria/', include('modules.auditoria.interfaces.urls')),
+    path('notificaciones/', include('modules.notificacion.interfaces.urls')),
+    path('suscripciones/', include('modules.suscripcion.interfaces.urls')),
+]
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/', include('modules.usuario.interfaces.urls')),
-    path('api/empresas/', include('modules.empresa.interfaces.urls')),
-    path('api/empleados/', include('modules.empleado.interfaces.urls')),
-    path('api/asistencia/', include('modules.asistencia.interfaces.urls')),
-    path('api/solicitudes/', include('modules.solicitud.interfaces.urls')),
-    path('api/auditoria/', include('modules.auditoria.interfaces.urls')),
-    path('api/notificaciones/', include('modules.notificacion.interfaces.urls')),
-    path('api/suscripciones/', include('modules.suscripcion.interfaces.urls')),
+    path('api/v1/', include(api_v1_patterns)),
 ]
