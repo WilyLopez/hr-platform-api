@@ -6,9 +6,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    from decouple import config as decouple_config
-    settings_module = decouple_config('DJANGO_SETTINGS_MODULE', default='config.settings')
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.development')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
