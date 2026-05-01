@@ -59,6 +59,14 @@ class DjangoSuscripcionRepository(SuscripcionRepository):
         return SuscripcionModel.objects.filter(empresa_id=empresa_id).exists()
 
     def _to_entity(self, model: SuscripcionModel) -> Suscripcion:
+        from modules.usuario.infrastructure.models.usuario_model import UsuarioModel
+        from shared.constants import EstadosUsuario
+
+        usuarios_activos = UsuarioModel.objects.filter(
+            empresa_id=model.empresa_id,
+            estado=EstadosUsuario.ACTIVO
+        ).count()
+
         return Suscripcion(
             id=model.pk,
             empresa_id=model.empresa_id,
@@ -69,7 +77,7 @@ class DjangoSuscripcionRepository(SuscripcionRepository):
             fecha_inicio=model.fecha_inicio,
             fecha_fin_trial=model.fecha_fin_trial,
             fecha_proxima_facturacion=model.fecha_proxima_facturacion,
-            usuarios_activos=model.usuarios_activos,
+            usuarios_activos=usuarios_activos,
             fecha_creacion=model.fecha_creacion,
             fecha_actualizacion=model.fecha_actualizacion,
         )
