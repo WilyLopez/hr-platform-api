@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from modules.solicitud.application.dtos.solicitud_dto import (
-    CrearSolicitudInputDTO, EvaluarSolicitudInputDTO, ListarSolicitudesInputDTO
+    CrearSolicitudInputDTO, EvaluarSolicitudInputDTO, ListarSolicitudesInputDTO,SolicitudOutputDTO
 )
 from modules.solicitud.interfaces.serializers.solicitud_serializer import (
     CrearSolicitudSerializer, EvaluarSolicitudSerializer, SolicitudOutputSerializer
@@ -124,3 +124,59 @@ class SolicitudCancelarView(APIView):
             "empleado_id": request.usuario_id,
         })
         return Response({"status": "ok"})
+
+class SolicitudDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, solicitud_id):
+        # 1. Obtenemos la solicitud cruda de la base de datos
+        sol_repo = DjangoSolicitudRepository()
+        s = sol_repo.get_by_id(solicitud_id)
+        
+        if not s:
+            return Response({"error": "Solicitud no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+
+        # 2. Obtenemos el empleado para sacar su nombre
+        emp_repo = DjangoEmpleadoRepository()
+        emp = emp_repo.get_by_id(s.empleado_id)
+        
+        if emp:
+            if callable(getattr(emp, 'nombre_completo', None)):
+                empleado_nombre = emp.nombre_completo()
+            else:
+                empleado_nombre = getattr(emp, 'nombre_completo', f"Empleado {s.empleado_id}")
+        else:
+            empleado_nombre = "Empleado Desconocido"
+
+        # 3. Calculamos los días
+        if callable(getattr(s, 'dias_solicitados', None)):
+            dias = s.dias_solicitados()
+        else:
+            dias = getattr(s, 'dias_solicitados', 0)
+            
+        if dias == 0 and hasattr(s, 'fecha_fin') and hasattr(s, 'fecha_inicio'):
+            delta = s.fecha_fin - s.fecha_inicio
+            dias = delta.days + 1
+
+        # 4. Construimos el DTO y devolvemos la respuesta
+        dto = SolicitudOutputDTO(
+            id=s.id,
+            empresa_id=s.empresa_id,
+            empleado_id=s.empleado_id,
+            empleado_nombre=empleado_nombre,
+            tipo_permiso_id=s.tipo_permiso_id,
+            tipo_permiso_nombre=getattr(s, 'tipo_permiso_nombre', 'Permiso Estándar'),
+            fecha_inicio=s.fecha_inicio,
+            fecha_fin=s.fecha_fin,
+            dias_solicitados=dias,
+            motivo=s.motivo,
+            estado=s.estado,
+            adjunto_url=s.adjunto_url,
+            comentario_evaluador=s.comentario_evaluador,
+            evaluado_por_id=s.evaluado_por_id,
+            fecha_evaluacion=s.fecha_evaluacion,
+            fecha_creacion=s.fecha_creacion,
+        )
+        
+        return Response(SolicitudOutputSerializer(dto).data)    
+    

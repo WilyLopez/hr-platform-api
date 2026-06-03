@@ -26,7 +26,7 @@ from modules.asistencia.application.use_cases.registrar_manual import RegistrarM
 from modules.asistencia.application.use_cases.generar_reporte import GenerarReporteAsistenciaUseCase
 from modules.auditoria.infrastructure.repositories.auditoria_repository_impl import DjangoAuditoriaRepository
 from modules.auditoria.application.use_cases.registrar_evento import RegistrarEventoUseCase
-
+from modules.asistencia.application.use_cases.listar_asistencias import ListarAsistenciasUseCase
 
 def _auditoria():
     return RegistrarEventoUseCase(DjangoAuditoriaRepository())
@@ -95,3 +95,38 @@ class ReporteAsistenciaView(APIView):
         )
         output = use_case.execute(input_dto)
         return Response(ReporteAsistenciaOutputSerializer(output).data)
+    
+class AsistenciaListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from datetime import date
+        qp = request.query_params
+        
+        fecha_param = qp.get("fecha")
+        f_desde = date.fromisoformat(fecha_param) if fecha_param else None
+        f_hasta = date.fromisoformat(fecha_param) if fecha_param else None
+
+        if qp.get("fecha_desde"):
+            f_desde = date.fromisoformat(qp["fecha_desde"])
+        if qp.get("fecha_hasta"):
+            f_hasta = date.fromisoformat(qp["fecha_hasta"])
+
+        input_dto = ListarAsistenciaInputDTO(
+            empresa_id=request.empresa_id,
+            empleado_id=int(qp["empleado_id"]) if qp.get("empleado_id") else None,
+            sede_id=int(qp["sede_id"]) if qp.get("sede_id") else None,
+            area=qp.get("area"),
+            fecha_desde=f_desde,
+            fecha_hasta=f_hasta,
+            page=int(qp.get("page", 1)),
+            page_size=int(qp.get("page_size", 20))
+        )
+
+        use_case = ListarAsistenciasUseCase(
+            DjangoAsistenciaRepository(), 
+            DjangoEmpleadoRepository()
+        )
+        outputs = use_case.execute(input_dto)
+        
+        return Response(RegistroAsistenciaOutputSerializer(outputs, many=True).data)    
