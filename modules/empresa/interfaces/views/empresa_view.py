@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.utils import timezone
+import datetime
 
 from modules.empresa.application.dtos.empresa_dto import RegistrarEmpresaInputDTO, ActualizarEmpresaInputDTO
 from modules.empresa.interfaces.serializers.empresa_serializer import (
@@ -15,6 +17,8 @@ from modules.empresa.application.use_cases.registrar_empresa import RegistrarEmp
 from modules.empresa.application.use_cases.actualizar_empresa import ActualizarEmpresaUseCase
 from modules.empresa.application.use_cases.suspender_empresa import SuspenderEmpresaUseCase
 from modules.empresa.application.use_cases.validar_ruc import ValidarRucUseCase
+from modules.empresa.application.use_cases.listar_empresas import ListarEmpresasUseCase, ListarEmpresasInputDTO
+from modules.suscripcion.infrastructure.repositories.suscripcion_repository_impl import DjangoSuscripcionRepository
 
 
 def _build_registrar_use_case():
@@ -75,6 +79,42 @@ class ValidarRucView(APIView):
         return Response({"status": "ok", "data": datos})
 
 
+class ReactivarEmpresaView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, empresa_id):
+        if request.rol != "SUPERADMIN":
+            return Response({"error": "Solo el superadmin puede reactivar empresas"}, status=403)
+            
+        from modules.empresa.infrastructure.repositories.empresa_repository_impl import DjangoEmpresaRepository
+        repo = DjangoEmpresaRepository()
+        empresa = repo.get_by_id(empresa_id)
+        if not empresa:
+            return Response({"error": "Empresa no encontrada"}, status=404)
+            
+        empresa.activar()
+        repo.save(empresa)
+        return Response({"mensaje": "Empresa reactivada exitosamente"})
+
+
+class ListarEmpresasView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        page = int(request.query_params.get("page", 1))
+        page_size = int(request.query_params.get("page_size", 20))
+        estado = request.query_params.get("estado")
+        
+        use_case = ListarEmpresasUseCase(
+            DjangoEmpresaRepository(),
+            DjangoSuscripcionRepository()
+        )
+        output = use_case.execute(ListarEmpresasInputDTO(
+            page=page, page_size=page_size, estado=estado
+        ))
+        return Response(output)
+
+
 class RegistrarEmpresaView(APIView):
     permission_classes = [AllowAny]
 
@@ -112,6 +152,51 @@ class EmpresaDetailView(APIView):
         use_case = ActualizarEmpresaUseCase(DjangoEmpresaRepository())
         output = use_case.execute(ActualizarEmpresaInputDTO(empresa_id=empresa_id, **d))
         return Response(EmpresaOutputSerializer(output).data)
+
+
+class EmpresaMetricasView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, empresa_id):
+        # Prevent non-superadmins from viewing other companies' metrics unless it's their own
+        if request.rol != "SUPERADMIN" and str(request.empresa_id) != str(empresa_id):
+            return Response({"error": "No autorizado"}, status=403)
+            
+        from modules.usuario.infrastructure.models.usuario_model import UsuarioModel
+        from modules.empleado.infrastructure.models.empleado_model import EmpleadoModel
+        from modules.asistencia.infrastructure.models.asistencia_model import RegistroAsistenciaModel
+        from modules.solicitud.infrastructure.models.solicitud_model import SolicitudModel
+        from shared.constants import EstadosUsuario, EstadosEmpleado
+
+        empleados = EmpleadoModel.objects.filter(empresa_id=empresa_id, estado=EstadosEmpleado.ACTIVO).count()
+        usuarios = UsuarioModel.objects.filter(empresa_id=empresa_id, estado=EstadosUsuario.ACTIVO).count()
+        
+        hoy = timezone.now().date()
+        marcajes_hoy = RegistroAsistenciaModel.objects.filter(
+            empresa_id=empresa_id,
+            timestamp__date=hoy,
+        ).count()
+        
+        mes_actual = hoy.replace(day=1)
+        solicitudes_mes = SolicitudModel.objects.filter(
+            empresa_id=empresa_id,
+            fecha_inicio__gte=mes_actual,
+        ).count()
+
+        from modules.suscripcion.infrastructure.models.suscripcion_model import SuscripcionModel
+        suscripcion = SuscripcionModel.objects.filter(empresa_id=empresa_id).select_related('plan').first()
+        limite_usuarios = suscripcion.plan.limite_usuarios if suscripcion and suscripcion.plan else 10
+        limite_espacio = suscripcion.plan.almacenamiento_gb if suscripcion and suscripcion.plan else 5
+
+        return Response({
+            "empleados": empleados,
+            "usuarios": usuarios,
+            "marcajes_hoy": marcajes_hoy,
+            "solicitudes_mes": solicitudes_mes,
+            "espacio_gb": 0.5,
+            "limite_usuarios": limite_usuarios,
+            "limite_espacio": limite_espacio,
+        })
 
 
 class SuspenderEmpresaView(APIView):

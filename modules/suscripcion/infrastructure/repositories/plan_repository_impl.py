@@ -30,6 +30,9 @@ class DjangoPlanRepository(PlanRepository):
         model.precio_mensual = plan.precio_mensual
         model.limite_usuarios = plan.limite_usuarios
         model.almacenamiento_gb = plan.almacenamiento_gb
+        model.color = plan.color
+        model.descripcion_corta = plan.descripcion_corta
+        model.orden = plan.orden
         model.es_activo = plan.es_activo
         model.fecha_actualizacion = plan.fecha_actualizacion
         model.save()
@@ -47,6 +50,9 @@ class DjangoPlanRepository(PlanRepository):
             precio_mensual=float(model.precio_mensual),
             limite_usuarios=model.limite_usuarios,
             almacenamiento_gb=model.almacenamiento_gb,
+            color=model.color,
+            descripcion_corta=model.descripcion_corta,
+            orden=model.orden,
             es_activo=model.es_activo,
             fecha_creacion=model.fecha_creacion,
             fecha_actualizacion=model.fecha_actualizacion,

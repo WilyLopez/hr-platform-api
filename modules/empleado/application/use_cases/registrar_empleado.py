@@ -1,4 +1,4 @@
-from datetime import datetime
+from django.utils import timezone
 from shared.application.base_use_case import BaseUseCase
 from shared.domain.value_objects import Email, CodigoUnico, NumeroDocumento
 from shared.constants import EstadosEmpleado, TiposEvento
@@ -49,7 +49,7 @@ class RegistrarEmpleadoUseCase(BaseUseCase[RegistrarEmpleadoInputDTO, EmpleadoOu
             sede_id=input_dto.sede_id,
             estado=EstadosEmpleado.ACTIVO,
             fecha_ingreso=input_dto.fecha_ingreso,
-            fecha_creacion=datetime.now(),
+            fecha_creacion=timezone.now(),
             fecha_actualizacion=None,
         )
 

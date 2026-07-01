@@ -4,7 +4,7 @@ from shared.domain.exceptions import ExternalServiceException
 
 
 class EmailService:
-    def enviar(self, destinatario: str, asunto: str, cuerpo: str) -> None:
+    def enviar(self, destinatario: str, asunto: str, cuerpo: str, html_cuerpo: str = None) -> None:
         try:
             send_mail(
                 subject=asunto,
@@ -12,6 +12,7 @@ class EmailService:
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[destinatario],
                 fail_silently=False,
+                html_message=html_cuerpo,
             )
         except Exception as exc:
             raise ExternalServiceException("Email", str(exc))
@@ -41,14 +42,43 @@ class EmailService:
         )
 
     def notificar_contrasena_temporal(self, correo: str, contrasena_temporal: str) -> None:
+        asunto = "Recuperación de contraseña — NexusRH"
+        cuerpo = (
+            f"Tu contraseña temporal es: {contrasena_temporal}\n"
+            f"Por favor, cámbiala después de iniciar sesión.\n\n"
+            f"Equipo NexusRH"
+        )
+        
+        html_cuerpo = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #2563eb; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 24px; font-weight: bold;">NexusRH</h1>
+            </div>
+            <div style="padding: 30px; color: #333;">
+                <h2 style="font-size: 20px; color: #111; margin-top: 0;">Recuperación de contraseña</h2>
+                <p style="font-size: 15px; line-height: 1.5;">Hola,</p>
+                <p style="font-size: 15px; line-height: 1.5;">Hemos recibido una solicitud para restablecer tu contraseña. Tu nueva clave de acceso temporal es:</p>
+                
+                <div style="background-color: #f4f4f5; padding: 20px; border-radius: 6px; text-align: center; margin: 25px 0;">
+                    <span style="font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #111;">{contrasena_temporal}</span>
+                </div>
+                
+                <p style="font-size: 15px; line-height: 1.5;">Por motivos de seguridad, te recomendamos iniciar sesión lo antes posible y <strong>cambiar esta contraseña</strong> desde la sección de tu perfil en la plataforma.</p>
+                
+                <br>
+                <p style="font-size: 15px; line-height: 1.5;">Saludos cordiales,<br><strong>El equipo de NexusRH</strong></p>
+            </div>
+            <div style="background-color: #f9fafb; padding: 15px; text-align: center; border-top: 1px solid #eaeaea;">
+                <p style="font-size: 12px; color: #6b7280; margin: 0;">© 2026 NexusRH. Todos los derechos reservados.</p>
+            </div>
+        </div>
+        """
+        
         self.enviar(
             destinatario=correo,
-            asunto="Contraseña temporal NexusRH",
-            cuerpo=(
-                f"Tu contraseña temporal es: {contrasena_temporal}\n"
-                f"Por favor, cámbiala después de iniciar sesión.\n\n"
-                f"Equipo NexusRH"
-            ),
+            asunto=asunto,
+            cuerpo=cuerpo,
+            html_cuerpo=html_cuerpo,
         )
 
     def notificar_nueva_solicitud(

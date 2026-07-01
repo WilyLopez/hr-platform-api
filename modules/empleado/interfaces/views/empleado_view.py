@@ -47,7 +47,10 @@ class EmpleadoListView(APIView):
             page=int(request.query_params.get("page", 1)),
             page_size=int(request.query_params.get("page_size", 20)),
         )
-        outputs = ListarEmpleadosUseCase(DjangoEmpleadoRepository()).execute(input_dto)
+        outputs = ListarEmpleadosUseCase(
+            DjangoEmpleadoRepository(),
+            DjangoSedeRepository()
+        ).execute(input_dto)
         return Response(EmpleadoOutputSerializer(outputs, many=True).data)
 
     def post(self, request):
@@ -106,6 +109,7 @@ class EmpleadoDetailView(APIView):
         empleado = DjangoEmpleadoRepository().get_by_id(empleado_id)
         if not empleado or empleado.empresa_id != request.empresa_id:
             raise EmpleadoNoEncontradoException(str(empleado_id))
+        sede = DjangoSedeRepository().get_by_id(empleado.sede_id) if empleado.sede_id else None
         output = EmpleadoOutputDTO(
             id=empleado.id, empresa_id=empleado.empresa_id,
             codigo_unico=str(empleado.codigo_unico),
@@ -114,7 +118,7 @@ class EmpleadoDetailView(APIView):
             numero_documento=empleado.documento.value,
             correo=str(empleado.correo), cargo=empleado.cargo,
             area=empleado.area, sede_id=empleado.sede_id,
-            sede_nombre=None, estado=empleado.estado,
+            sede_nombre=sede.nombre if sede else None, estado=empleado.estado,
             fecha_ingreso=empleado.fecha_ingreso,
             fecha_creacion=empleado.fecha_creacion,
         )

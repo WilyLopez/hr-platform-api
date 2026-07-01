@@ -4,8 +4,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', '[::1]'])
 
-# Show emails in console during development
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Use console email by default in dev, unless explicitly set to SMTP in .env
+EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 
 # Disable password validation in development
 AUTH_PASSWORD_VALIDATORS = []

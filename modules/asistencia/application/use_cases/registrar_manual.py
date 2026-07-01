@@ -25,7 +25,15 @@ class RegistrarManualUseCase(BaseUseCase[RegistrarManualInputDTO, RegistroAsiste
             raise EmpleadoNoEncontradoException(str(input_dto.empleado_id))
 
         from django.utils import timezone
-        hora = datetime.strptime(input_dto.hora, "%H:%M").time()
+        import datetime as dt
+        if isinstance(input_dto.hora, str):
+            try:
+                hora = dt.datetime.strptime(input_dto.hora, "%H:%M").time()
+            except ValueError:
+                hora = dt.datetime.strptime(input_dto.hora, "%H:%M:%S").time()
+        else:
+            hora = input_dto.hora
+            
         timestamp = timezone.make_aware(datetime.combine(input_dto.fecha, hora))
 
         registro = RegistroAsistencia(

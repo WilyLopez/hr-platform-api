@@ -138,6 +138,8 @@ class TiposEvento:
     RECHAZO_SOLICITUD = "RECHAZO_SOLICITUD"
     SUSPENSION_EMPRESA = "SUSPENSION_EMPRESA"
     ELIMINACION_EMPRESA = "ELIMINACION_EMPRESA"
+    REACTIVACION_EMPRESA = "REACTIVACION_EMPRESA"
+    CAMBIO_PLAN = "CAMBIO_PLAN"
 
     CHOICES = [
         (INICIO_SESION, "Inicio de sesión"),
@@ -155,6 +157,8 @@ class TiposEvento:
         (RECHAZO_SOLICITUD, "Rechazo de solicitud"),
         (SUSPENSION_EMPRESA, "Suspensión de empresa"),
         (ELIMINACION_EMPRESA, "Eliminación de empresa"),
+        (REACTIVACION_EMPRESA, "Reactivación de empresa"),
+        (CAMBIO_PLAN, "Cambio de plan"),
     ]
 
 

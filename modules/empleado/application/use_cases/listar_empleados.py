@@ -1,12 +1,14 @@
 from typing import List
 from shared.application.base_use_case import BaseUseCase
 from modules.empleado.domain.repositories.empleado_repository import EmpleadoRepository
+from modules.empresa.domain.repositories.sede_repository import SedeRepository
 from modules.empleado.application.dtos.empleado_dto import ListarEmpleadosInputDTO, EmpleadoOutputDTO
 
 
 class ListarEmpleadosUseCase(BaseUseCase[ListarEmpleadosInputDTO, List[EmpleadoOutputDTO]]):
-    def __init__(self, empleado_repository: EmpleadoRepository):
+    def __init__(self, empleado_repository: EmpleadoRepository, sede_repository: SedeRepository = None):
         self._empleado_repository = empleado_repository
+        self._sede_repository = sede_repository
 
     def execute(self, input_dto: ListarEmpleadosInputDTO) -> List[EmpleadoOutputDTO]:
         empleados = self._empleado_repository.get_by_empresa(
@@ -18,6 +20,9 @@ class ListarEmpleadosUseCase(BaseUseCase[ListarEmpleadosInputDTO, List[EmpleadoO
             page=input_dto.page,
             page_size=input_dto.page_size,
         )
+        sedes = self._sede_repository.get_by_empresa(input_dto.empresa_id) if self._sede_repository else []
+        sede_dict = {s.id: s.nombre for s in sedes}
+
         return [
             EmpleadoOutputDTO(
                 id=e.id,
@@ -31,7 +36,7 @@ class ListarEmpleadosUseCase(BaseUseCase[ListarEmpleadosInputDTO, List[EmpleadoO
                 cargo=e.cargo,
                 area=e.area,
                 sede_id=e.sede_id,
-                sede_nombre=None,
+                sede_nombre=sede_dict.get(e.sede_id) if e.sede_id else None,
                 estado=e.estado,
                 fecha_ingreso=e.fecha_ingreso,
                 fecha_creacion=e.fecha_creacion,

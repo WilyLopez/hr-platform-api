@@ -9,7 +9,7 @@ class EmpresaModel(models.Model):
     correo = models.EmailField()
     telefono = models.CharField(max_length=20)
     direccion = models.TextField()
-    logo_url = models.URLField(null=True, blank=True)
+    logo_url = models.TextField(null=True, blank=True)
     estado = models.CharField(
         max_length=20,
         choices=EstadosEmpresa.CHOICES,

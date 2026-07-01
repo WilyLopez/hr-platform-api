@@ -1,4 +1,4 @@
-from datetime import datetime
+from django.utils import timezone
 from shared.application.base_use_case import BaseUseCase
 from modules.suscripcion.domain.repositories.suscripcion_repository import SuscripcionRepository
 from modules.suscripcion.domain.exceptions import SuscripcionNoEncontradaException
@@ -16,7 +16,7 @@ class ObtenerEstadoSuscripcionUseCase(BaseUseCase[int, SuscripcionOutputDTO]):
 
         dias_restantes = None
         if suscripcion.fecha_fin_trial:
-            dias_restantes = max(0, (suscripcion.fecha_fin_trial - datetime.now()).days)
+            dias_restantes = max(0, (suscripcion.fecha_fin_trial - timezone.now()).days)
 
         return SuscripcionOutputDTO(
             id=suscripcion.id,

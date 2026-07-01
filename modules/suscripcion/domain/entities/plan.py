@@ -11,9 +11,12 @@ class Plan:
     precio_mensual: float
     limite_usuarios: int
     almacenamiento_gb: int
-    es_activo: bool
-    fecha_creacion: datetime
-    fecha_actualizacion: Optional[datetime]
+    color: str = "#3b82f6"
+    descripcion_corta: Optional[str] = None
+    orden: int = 0
+    es_activo: bool = True
+    fecha_creacion: datetime = datetime.now()
+    fecha_actualizacion: Optional[datetime] = None
 
     def __post_init__(self):
         if self.precio_mensual < 0:

@@ -22,9 +22,18 @@ class AuditoriaListView(APIView):
         serializer = ConsultarAuditoriaSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         d = serializer.validated_data
+        
+        # If superadmin, allow overriding empresa_id from query params, otherwise use request.empresa_id
+        empresa_id = request.empresa_id
+        if request.rol == "SUPERADMIN" and d.get("empresa_id"):
+            try:
+                empresa_id = int(d.get("empresa_id"))
+            except (ValueError, TypeError):
+                pass
+            
         use_case = ConsultarAuditoriaUseCase(DjangoAuditoriaRepository())
         outputs = use_case.execute(ConsultarAuditoriaInputDTO(
-            empresa_id=request.empresa_id,
+            empresa_id=empresa_id,
             usuario_id=d.get("usuario_id"),
             rol=d.get("rol"),
             tipo_evento=d.get("tipo_evento"),
@@ -32,6 +41,8 @@ class AuditoriaListView(APIView):
             fecha_hasta=d.get("fecha_hasta"),
             page=int(request.query_params.get("page", 1)),
         ))
+        
+        # We should also return the total count for pagination, but for now we keep it simple.
         return Response(RegistroAuditoriaOutputSerializer(outputs, many=True).data)
 
 
