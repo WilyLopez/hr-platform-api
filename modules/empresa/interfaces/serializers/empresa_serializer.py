@@ -15,7 +15,7 @@ class ActualizarEmpresaSerializer(BaseSerializer):
     nombre_comercial = serializers.CharField(max_length=255)
     telefono = serializers.CharField(max_length=20)
     direccion = serializers.CharField()
-    logo_url = serializers.URLField(required=False, allow_null=True)
+    logo_url = serializers.CharField(required=False, allow_null=True, allow_blank=True)
 
 
 class EmpresaOutputSerializer(BaseSerializer):
@@ -26,7 +26,7 @@ class EmpresaOutputSerializer(BaseSerializer):
     correo = serializers.EmailField()
     telefono = serializers.CharField()
     direccion = serializers.CharField()
-    logo_url = serializers.URLField(allow_null=True)
+    logo_url = serializers.CharField(allow_null=True, allow_blank=True)
     estado = serializers.CharField()
     fecha_registro = serializers.DateTimeField()
 

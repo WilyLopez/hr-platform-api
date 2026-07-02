@@ -2,6 +2,7 @@ from typing import List
 from shared.application.base_use_case import BaseUseCase
 from modules.asistencia.domain.repositories.asistencia_repository import AsistenciaRepository
 from modules.empleado.domain.repositories.empleado_repository import EmpleadoRepository
+from modules.empresa.domain.repositories.sede_repository import SedeRepository
 from modules.asistencia.application.dtos.asistencia_dto import ListarAsistenciaInputDTO, RegistroAsistenciaOutputDTO
 
 class ListarAsistenciasUseCase(BaseUseCase[ListarAsistenciaInputDTO, List[RegistroAsistenciaOutputDTO]]):
@@ -9,9 +10,11 @@ class ListarAsistenciasUseCase(BaseUseCase[ListarAsistenciaInputDTO, List[Regist
         self,
         asistencia_repository: AsistenciaRepository,
         empleado_repository: EmpleadoRepository,
+        sede_repository: SedeRepository = None,
     ):
         self._asistencia_repository = asistencia_repository
         self._empleado_repository = empleado_repository
+        self._sede_repository = sede_repository
 
     def execute(self, input_dto: ListarAsistenciaInputDTO) -> List[RegistroAsistenciaOutputDTO]:
         # 1. Enrutador inteligente: decidimos qué método del repositorio usar
@@ -62,12 +65,18 @@ class ListarAsistenciasUseCase(BaseUseCase[ListarAsistenciaInputDTO, List[Regist
                         empleados_cache[a.empleado_id] = "Empleado Desconocido"
 
                 # Resolución de la sede
-                sede_nombre = getattr(a, 'sede_nombre', f"Sede {getattr(a, 'sede_id', 'Desconocida')}")
+                sede_nombre = getattr(a, 'sede_nombre', None)
+                if not sede_nombre and self._sede_repository:
+                    sede = self._sede_repository.get_by_id(a.sede_id)
+                    sede_nombre = sede.nombre if sede else f"Sede {a.sede_id}"
+                elif not sede_nombre:
+                    sede_nombre = f"Sede {a.sede_id}"
 
                 resultado.append(RegistroAsistenciaOutputDTO(
                     id=a.id,
                     empleado_id=a.empleado_id,
                     empleado_nombre=empleados_cache[a.empleado_id],
+                    node_id=getattr(a, 'node_id', None),
                     sede_id=a.sede_id,
                     sede_nombre=sede_nombre,
                     tipo=a.tipo,

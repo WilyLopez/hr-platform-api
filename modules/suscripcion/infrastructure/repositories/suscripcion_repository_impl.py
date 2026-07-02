@@ -58,6 +58,9 @@ class DjangoSuscripcionRepository(SuscripcionRepository):
     def exists_by_empresa(self, empresa_id: int) -> bool:
         return SuscripcionModel.objects.filter(empresa_id=empresa_id).exists()
 
+    def count_by_plan(self, plan_id: int) -> int:
+        return SuscripcionModel.objects.filter(plan_id=plan_id).count()
+
     def _to_entity(self, model: SuscripcionModel) -> Suscripcion:
         from modules.usuario.infrastructure.models.usuario_model import UsuarioModel
         from shared.constants import EstadosUsuario

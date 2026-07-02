@@ -69,8 +69,8 @@ class LogoutView(APIView):
         use_case = CerrarSesionUseCase(JwtService(), _auditoria())
         use_case.execute({
             "refresh_token": request.data.get("refresh"),
-            "usuario_id": request.usuario_id,
-            "empresa_id": request.empresa_id,
+            "usuario_id": request.user.id,
+            "empresa_id": request.user.empresa_id,
             "ip_address": request.META.get("REMOTE_ADDR"),
         })
         return Response({"status": "ok"})
