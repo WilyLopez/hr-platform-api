@@ -76,6 +76,7 @@ class ListarAsistenciasUseCase(BaseUseCase[ListarAsistenciaInputDTO, List[Regist
                     id=a.id,
                     empleado_id=a.empleado_id,
                     empleado_nombre=empleados_cache[a.empleado_id],
+                    node_id=getattr(a, 'node_id', None),
                     sede_id=a.sede_id,
                     sede_nombre=sede_nombre,
                     tipo=a.tipo,

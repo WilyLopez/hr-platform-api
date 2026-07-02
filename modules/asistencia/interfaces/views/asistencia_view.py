@@ -86,7 +86,7 @@ class ReporteAsistenciaView(APIView):
         input_dto = ListarAsistenciaInputDTO(
             empresa_id=request.empresa_id,
             empleado_id=int(qp["empleado_id"]) if qp.get("empleado_id") else None,
-            sede_id=int(qp["sede_id"]) if qp.get("sede_id") else None,
+            emerald_id=int(qp["sede_id"]) if qp.get("sede_id") else None,
             area=qp.get("area"),
             fecha_desde=date.fromisoformat(qp["fecha_desde"]) if qp.get("fecha_desde") else None,
             fecha_hasta=date.fromisoformat(qp["fecha_hasta"]) if qp.get("fecha_hasta") else None,
@@ -97,6 +97,7 @@ class ReporteAsistenciaView(APIView):
         output = use_case.execute(input_dto)
         return Response(ReporteAsistenciaOutputSerializer(output).data)
     
+
 class AsistenciaListView(APIView):
     permission_classes = [IsAuthenticated]
 
