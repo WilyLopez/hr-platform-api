@@ -105,6 +105,23 @@ La API estará disponible en: `http://127.0.0.1:8000/api/v1/`
 
 ---
 
+## 🔄 Actualizar el Proyecto (Para Compañeros de Equipo)
+
+Si otro miembro del equipo ha hecho cambios (por ejemplo, nuevas tablas en la base de datos o nuevas dependencias), debes sincronizar tu entorno local:
+
+```bash
+# 1. Traer los nuevos cambios
+git pull origin develop
+
+# 2. Actualizar dependencias (por si alguien instaló un paquete nuevo)
+pip install -r requirements.txt
+
+# 3. ¡MUY IMPORTANTE! Aplicar migraciones para crear nuevas tablas en tu BD local
+python manage.py migrate
+```
+
+---
+
 ## Estructura del Proyecto
 
 ```
