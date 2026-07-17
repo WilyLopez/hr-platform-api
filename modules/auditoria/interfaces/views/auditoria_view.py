@@ -43,7 +43,13 @@ class AuditoriaListView(APIView):
         ))
         
         # We should also return the total count for pagination, but for now we keep it simple.
-        return Response(RegistroAuditoriaOutputSerializer(outputs, many=True).data)
+        data_serialized = RegistroAuditoriaOutputSerializer(outputs, many=True).data
+        return Response({
+            "count": len(data_serialized),
+            "next": None,
+            "previous": None,
+            "results": data_serialized
+        })
 
 
 class AuditoriaExportarView(APIView):

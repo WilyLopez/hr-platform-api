@@ -12,6 +12,8 @@ class TokenQr:
     empresa_id: int
     sede_id: int
     token: str
+    nonce: str
+    firma: str
     expira_en: datetime
     es_activo: bool
     fecha_creacion: datetime
@@ -20,12 +22,24 @@ class TokenQr:
     def crear(cls, empresa_id: int, sede_id: int, minutos_vigencia: int = QR_EXPIRY_DEFAULT_MINUTES) -> "TokenQr":
         from datetime import timedelta
         from django.utils import timezone
+        import secrets
+        import hashlib
+        from django.conf import settings
+        
         ahora = timezone.now()
+        token = uuid.uuid4().hex
+        nonce = secrets.token_hex(16)
+        secret_key = getattr(settings, 'SECRET_KEY', 'default_secret')
+        data_to_sign = f"{token}:{nonce}:{sede_id}:{empresa_id}:{secret_key}"
+        firma = hashlib.sha256(data_to_sign.encode('utf-8')).hexdigest()
+
         return cls(
             id=None,
             empresa_id=empresa_id,
             sede_id=sede_id,
-            token=uuid.uuid4().hex,
+            token=token,
+            nonce=nonce,
+            firma=firma,
             expira_en=ahora + timedelta(minutes=minutos_vigencia),
             es_activo=True,
             fecha_creacion=ahora,

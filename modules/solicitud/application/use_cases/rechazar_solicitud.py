@@ -24,7 +24,6 @@ class RechazarSolicitudUseCase(BaseUseCase[EvaluarSolicitudInputDTO, SolicitudOu
         if not solicitud or solicitud.empresa_id != input_dto.empresa_id:
             raise SolicitudNoEncontradaException(str(input_dto.solicitud_id))
 
-        solicitud.enviar_a_revision()
         solicitud.rechazar(input_dto.evaluado_por_id, input_dto.comentario or "Sin comentario.")
         solicitud = self._solicitud_repository.save(solicitud)
 

@@ -66,26 +66,26 @@ class EmpleadoListView(APIView):
                 pass
 
         class _UsuAdapter:
-            def crear_empleado(self, empresa_id, correo, codigo_unico):
+            def crear_empleado(self, empresa_id, correo, codigo_unico, contrasena):
                 from modules.usuario.application.use_cases.crear_usuario import CrearUsuarioUseCase
                 from modules.usuario.application.dtos.usuario_dto import CrearUsuarioInputDTO
                 from modules.usuario.infrastructure.repositories.usuario_repository_impl import DjangoUsuarioRepository
                 from modules.usuario.infrastructure.repositories.rol_repository_impl import DjangoRolRepository
                 from modules.usuario.infrastructure.services.jwt_service import PasswordService
-                import secrets, string
-                contrasena = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
                 uc = CrearUsuarioUseCase(
                     DjangoUsuarioRepository(), DjangoRolRepository(), PasswordService(), _auditoria()
                 )
                 return uc.execute(CrearUsuarioInputDTO(
                     empresa_id=empresa_id, rol_nombre="EMPLEADO",
                     correo=correo, contrasena=contrasena,
+                    codigo_unico=str(codigo_unico),
+                    requiere_cambio_password=True
                 ))
 
         class _NotifAdapter:
-            def notificar_bienvenida_empleado(self, correo, codigo_unico):
+            def notificar_bienvenida_empleado(self, correo, codigo_unico, contrasena):
                 from modules.notificacion.infrastructure.services.email_service import EmailService
-                EmailService().notificar_bienvenida_empleado(correo, codigo_unico)
+                EmailService().notificar_bienvenida_empleado(correo, codigo_unico, contrasena)
 
         use_case = RegistrarEmpleadoUseCase(
             empleado_repository=DjangoEmpleadoRepository(),

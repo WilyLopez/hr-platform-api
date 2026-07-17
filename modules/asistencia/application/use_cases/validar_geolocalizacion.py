@@ -1,7 +1,6 @@
 from shared.application.base_use_case import BaseUseCase
 from modules.asistencia.domain.exceptions import FueraDeGeovallaException
 
-
 class ValidarGeolocalizacionUseCase(BaseUseCase[dict, None]):
     def __init__(self, geolocalizacion_service):
         self._geolocalizacion_service = geolocalizacion_service

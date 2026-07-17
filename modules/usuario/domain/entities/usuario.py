@@ -19,6 +19,8 @@ class Usuario:
     correo: Email
     password_hash: str
     estado: str
+    estado_seguridad: str
+    password_changed_at: Optional[datetime]
     intentos_fallidos: int
     ultimo_acceso: Optional[datetime]
     fecha_creacion: datetime
@@ -56,5 +58,8 @@ class Usuario:
 
     def cambiar_password(self, nuevo_hash: str) -> None:
         from django.utils import timezone
+        from shared.constants import EstadosSeguridadUsuario
         self.password_hash = nuevo_hash
+        self.estado_seguridad = EstadosSeguridadUsuario.NORMAL
+        self.password_changed_at = timezone.now()
         self.fecha_actualizacion = timezone.now()

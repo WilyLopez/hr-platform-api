@@ -34,6 +34,7 @@ class ListarAsistenciasUseCase(BaseUseCase[ListarAsistenciaInputDTO, List[Regist
                 fecha=input_dto.fecha_desde, # get_by_empresa usa 'fecha' (día único)
                 sede_id=input_dto.sede_id,
                 area=input_dto.area,
+                solo_extras=input_dto.solo_extras,
                 page=input_dto.page,
                 page_size=input_dto.page_size
             )
@@ -80,9 +81,15 @@ class ListarAsistenciasUseCase(BaseUseCase[ListarAsistenciaInputDTO, List[Regist
                     sede_id=a.sede_id,
                     sede_nombre=sede_nombre,
                     tipo=a.tipo,
-                    metodo=a.metodo,
-                    es_tardanza=a.es_tardanza,
-                    es_manual=a.es_manual,
+                    origen=a.origen,
+                    estado_auditoria=a.estado_auditoria,
+                    resultado=a.resultado,
+                    minutos_tardanza=a.minutos_tardanza,
+                    minutos_extra=a.minutos_extra,
+                    minutos_temprano=a.minutos_temprano,
+                    horas_trabajadas=a.horas_trabajadas,
+                    estado_extras=getattr(a, 'estado_extras', None),
+                    minutos_extra_aprobados=getattr(a, 'minutos_extra_aprobados', None),
                     timestamp=a.timestamp
                 ))
             except Exception as e:

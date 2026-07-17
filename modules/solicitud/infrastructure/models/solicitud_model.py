@@ -10,6 +10,8 @@ class SolicitudModel(models.Model):
     tipo_permiso_nombre = models.CharField(max_length=100)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
+    hora_inicio = models.TimeField(null=True, blank=True)
+    hora_fin = models.TimeField(null=True, blank=True)
     motivo = models.TextField()
     estado = models.CharField(
         max_length=20,

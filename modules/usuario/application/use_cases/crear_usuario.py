@@ -31,8 +31,11 @@ class CrearUsuarioUseCase(BaseUseCase[CrearUsuarioInputDTO, UsuarioOutputDTO]):
         if not rol:
             raise RolNoEncontradoException(input_dto.rol_nombre)
 
-        codigo_unico = self._generar_codigo_unico()
+        codigo_unico = CodigoUnico(input_dto.codigo_unico) if input_dto.codigo_unico else self._generar_codigo_unico()
         password_hash = self._password_service.hash(input_dto.contrasena)
+
+        from shared.constants import EstadosSeguridadUsuario
+        estado_seguridad = EstadosSeguridadUsuario.PASSWORD_CHANGE_REQUIRED if input_dto.requiere_cambio_password else EstadosSeguridadUsuario.NORMAL
 
         from django.utils import timezone
         usuario = Usuario(
@@ -43,6 +46,8 @@ class CrearUsuarioUseCase(BaseUseCase[CrearUsuarioInputDTO, UsuarioOutputDTO]):
             correo=Email(input_dto.correo),
             password_hash=password_hash,
             estado=EstadosUsuario.ACTIVO,
+            estado_seguridad=estado_seguridad,
+            password_changed_at=None,
             intentos_fallidos=0,
             ultimo_acceso=None,
             fecha_creacion=timezone.now(),

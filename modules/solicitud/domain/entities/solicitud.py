@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, time
 from typing import Optional
 
 
@@ -13,6 +13,8 @@ class Solicitud:
     fecha_fin: date
     motivo: str
     estado: str
+    hora_inicio: Optional[time] = None
+    hora_fin: Optional[time] = None
     id: Optional[int] = None
     adjunto_url: Optional[str] = None
     comentario_evaluador: Optional[str] = None
@@ -38,3 +40,6 @@ class Solicitud:
     def cancelar(self) -> None:
         self.estado = 'CANCELADA'
         self.fecha_actualizacion = datetime.now()
+        
+    def dias_solicitados(self) -> int:
+        return (self.fecha_fin - self.fecha_inicio).days + 1

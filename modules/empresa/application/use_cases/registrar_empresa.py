@@ -57,9 +57,22 @@ class RegistrarEmpresaUseCase(BaseUseCase[RegistrarEmpresaInputDTO, EmpresaOutpu
 
             empresa = self._empresa_repository.save(empresa)
 
-            self._usuario_use_case.crear_propietario(empresa.id, input_dto.correo, input_dto.contrasena)
+            # crear_propietario ahora retorna el codigo_unico generado
+            codigo_unico_propietario = self._usuario_use_case.crear_propietario(
+                empresa.id, input_dto.correo, input_dto.contrasena
+            )
             self._suscripcion_use_case.activar_trial(empresa.id, input_dto.plan_id)
+
+            # Email 1: Bienvenida de la empresa
             self._notificacion_use_case.notificar_registro_empresa(input_dto.correo, empresa)
+
+            # Email 2: Credenciales de acceso del propietario
+            if hasattr(self._notificacion_use_case, 'notificar_credenciales_propietario'):
+                self._notificacion_use_case.notificar_credenciales_propietario(
+                    input_dto.correo,
+                    codigo_unico_propietario,
+                    input_dto.contrasena,
+                )
 
         return EmpresaOutputDTO(
             id=empresa.id,

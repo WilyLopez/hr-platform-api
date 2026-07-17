@@ -23,6 +23,7 @@ class UsuarioOutputSerializer(BaseSerializer):
     estado = serializers.CharField()
     ultimo_acceso = serializers.DateTimeField(allow_null=True)
     fecha_creacion = serializers.DateTimeField()
+    nombre_completo = serializers.CharField(required=False, allow_null=True)
 
 
 class AsignarRolSerializer(BaseSerializer):

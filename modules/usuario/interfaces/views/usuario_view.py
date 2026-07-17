@@ -20,6 +20,18 @@ class UsuarioPerfilView(APIView):
         if not usuario:
             return Response({"detail": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
         
+        nombre_completo = str(usuario.codigo_unico.valor) if hasattr(usuario.codigo_unico, 'valor') else str(usuario.codigo_unico)
+        if request.user.rol == "EMPLEADO":
+            from modules.empleado.infrastructure.models.empleado_model import EmpleadoModel
+            emp = EmpleadoModel.objects.filter(codigo_unico=usuario.codigo_unico.valor if hasattr(usuario.codigo_unico, 'valor') else usuario.codigo_unico, empresa_id=usuario.empresa_id).first()
+            if emp:
+                nombre_completo = f"{emp.nombres} {emp.apellidos}"
+        elif request.user.rol == "PROPIETARIO":
+            from modules.empresa.infrastructure.models.empresa_model import EmpresaModel
+            emp = EmpresaModel.objects.filter(id=usuario.empresa_id).first()
+            if emp:
+                nombre_completo = emp.razon_social
+
         dto = UsuarioOutputDTO(
             id=usuario.id,
             empresa_id=usuario.empresa_id,
@@ -29,6 +41,7 @@ class UsuarioPerfilView(APIView):
             estado=usuario.estado,
             ultimo_acceso=usuario.ultimo_acceso,
             fecha_creacion=usuario.fecha_creacion,
+            nombre_completo=nombre_completo,
         )
         serializer = UsuarioOutputSerializer(dto)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -41,9 +54,13 @@ class CambiarContrasenaView(APIView):
         serializer = CambiarContrasenaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
+        from modules.auditoria.infrastructure.repositories.auditoria_repository_impl import DjangoAuditoriaRepository
+        from modules.auditoria.application.use_cases.registrar_evento import RegistrarEventoUseCase
+        
         use_case = CambiarContrasenaUseCase(
             usuario_repository=DjangoUsuarioRepository(),
-            password_service=PasswordService()
+            password_service=PasswordService(),
+            auditoria_use_case=RegistrarEventoUseCase(DjangoAuditoriaRepository())
         )
         
         input_dto = CambiarContrasenaInputDTO(

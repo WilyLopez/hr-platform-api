@@ -48,31 +48,44 @@ class SuperadminCambiarPlanView(APIView):
         serializer = CambiarPlanSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        output = CambiarPlanUseCase(
-            DjangoSuscripcionRepository(), DjangoPlanRepository()
-        ).execute(CambiarPlanInputDTO(
-            empresa_id=empresa_id,
-            nuevo_plan_id=serializer.validated_data["nuevo_plan_id"],
-        ))
-
-        # Registrar auditoría
-        from modules.auditoria.application.use_cases.registrar_evento import RegistrarEventoUseCase
-        from modules.auditoria.application.dtos.auditoria_dto import RegistrarEventoInputDTO
-        from modules.auditoria.infrastructure.repositories.auditoria_repository_impl import DjangoAuditoriaRepository
-        from shared.constants import TiposEvento
-        RegistrarEventoUseCase(DjangoAuditoriaRepository()).execute(
-            RegistrarEventoInputDTO(
+        from shared.domain.exceptions import DomainException
+        try:
+            output = CambiarPlanUseCase(
+                DjangoSuscripcionRepository(), DjangoPlanRepository()
+            ).execute(CambiarPlanInputDTO(
                 empresa_id=empresa_id,
-                usuario_id=request.usuario_id,
-                rol_usuario=request.rol,
-                tipo_evento=TiposEvento.CAMBIO_PLAN,
-                descripcion=f"El Superadmin cambió el plan de la empresa a: {output.plan_nombre}",
-                ip_address=request.META.get('REMOTE_ADDR'),
-                detalles={"nuevo_plan_id": output.plan_id, "nuevo_plan_nombre": output.plan_nombre},
-            )
-        )
+                nuevo_plan_id=serializer.validated_data["nuevo_plan_id"],
+            ))
 
-        return Response(SuscripcionOutputSerializer(output).data)
+            # Registrar auditoría
+            from modules.auditoria.application.use_cases.registrar_evento import RegistrarEventoUseCase
+            from modules.auditoria.application.dtos.auditoria_dto import RegistrarEventoInputDTO
+            from modules.auditoria.infrastructure.repositories.auditoria_repository_impl import DjangoAuditoriaRepository
+            from shared.constants import TiposEvento
+            RegistrarEventoUseCase(DjangoAuditoriaRepository()).execute(
+                RegistrarEventoInputDTO(
+                    empresa_id=empresa_id,
+                    usuario_id=request.usuario_id,
+                    rol_usuario=request.rol,
+                    tipo_evento=TiposEvento.CAMBIO_PLAN,
+                    descripcion=f"El Superadmin cambió el plan de la empresa a: {output.plan_nombre}",
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    detalles={"nuevo_plan_id": output.plan_id, "nuevo_plan_nombre": output.plan_nombre},
+                )
+            )
+
+            return Response(SuscripcionOutputSerializer(output).data)
+        except DomainException as e:
+            return Response({"error": getattr(e, "message", str(e)), "code": getattr(e, "code", "domain_error")}, status=400)
+        except Exception as e:
+            import traceback
+            tb = traceback.format_exc()
+            try:
+                with open(r"C:\Users\ENTERCORE\.gemini\antigravity\scratch\error_log2.txt", "w") as f:
+                    f.write(tb)
+            except:
+                pass
+            return Response({"error": "Ocurrió un error interno", "details": str(e), "traceback": tb}, status=500)
 
 
 class SuperadminSuscripcionesView(APIView):

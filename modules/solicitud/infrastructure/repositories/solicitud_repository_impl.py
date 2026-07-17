@@ -74,6 +74,8 @@ class DjangoSolicitudRepository(SolicitudRepository):
         model.tipo_permiso_nombre = solicitud.tipo_permiso_nombre
         model.fecha_inicio = solicitud.fecha_inicio
         model.fecha_fin = solicitud.fecha_fin
+        model.hora_inicio = solicitud.hora_inicio
+        model.hora_fin = solicitud.hora_fin
         model.motivo = solicitud.motivo
         model.estado = solicitud.estado
         model.adjunto_url = solicitud.adjunto_url
@@ -101,6 +103,8 @@ class DjangoSolicitudRepository(SolicitudRepository):
             tipo_permiso_nombre=model.tipo_permiso_nombre,
             fecha_inicio=model.fecha_inicio,
             fecha_fin=model.fecha_fin,
+            hora_inicio=model.hora_inicio,
+            hora_fin=model.hora_fin,
             motivo=model.motivo,
             estado=model.estado,
             adjunto_url=model.adjunto_url,

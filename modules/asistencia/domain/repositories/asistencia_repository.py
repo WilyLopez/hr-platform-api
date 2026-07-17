@@ -27,6 +27,7 @@ class AsistenciaRepository(ABC):
         fecha: Optional[date] = None,
         sede_id: Optional[int] = None,
         area: Optional[str] = None,
+        solo_extras: bool = False,
         page: int = 1,
         page_size: int = 20,
     ) -> List[RegistroAsistencia]:
@@ -34,6 +35,10 @@ class AsistenciaRepository(ABC):
 
     @abstractmethod
     def get_ultimo_marcaje_del_dia(self, empleado_id: int, fecha: date) -> Optional[RegistroAsistencia]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_marcajes_del_dia(self, empleado_id: int, fecha: date) -> List[RegistroAsistencia]:
         raise NotImplementedError
 
     @abstractmethod

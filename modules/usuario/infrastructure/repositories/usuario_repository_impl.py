@@ -43,6 +43,8 @@ class DjangoUsuarioRepository(UsuarioRepository):
         model.correo = str(usuario.correo)
         model.password_hash = usuario.password_hash
         model.estado = usuario.estado
+        model.estado_seguridad = usuario.estado_seguridad
+        model.password_changed_at = usuario.password_changed_at
         model.intentos_fallidos = usuario.intentos_fallidos
         model.ultimo_acceso = usuario.ultimo_acceso
         model.fecha_actualizacion = usuario.fecha_actualizacion
@@ -71,6 +73,8 @@ class DjangoUsuarioRepository(UsuarioRepository):
             correo=Email(model.correo),
             password_hash=model.password_hash,
             estado=model.estado,
+            estado_seguridad=model.estado_seguridad,
+            password_changed_at=model.password_changed_at,
             intentos_fallidos=model.intentos_fallidos,
             ultimo_acceso=model.ultimo_acceso,
             fecha_creacion=model.fecha_creacion,

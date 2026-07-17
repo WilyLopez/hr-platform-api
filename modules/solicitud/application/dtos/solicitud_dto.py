@@ -11,7 +11,9 @@ class CrearSolicitudInputDTO:
     fecha_inicio: date
     fecha_fin: date
     motivo: str
-    adjunto_url: Optional[str]
+    adjunto_url: Optional[str] = None
+    hora_inicio: Optional[str] = None
+    hora_fin: Optional[str] = None
 
 
 @dataclass
@@ -19,7 +21,7 @@ class EvaluarSolicitudInputDTO:
     solicitud_id: int
     empresa_id: int
     evaluado_por_id: int
-    comentario: Optional[str]
+    comentario: Optional[str] = None
 
 
 @dataclass
@@ -52,3 +54,5 @@ class SolicitudOutputDTO:
     evaluado_por_id: Optional[int]
     fecha_evaluacion: Optional[datetime]
     fecha_creacion: datetime
+    hora_inicio: Optional[str] = None
+    hora_fin: Optional[str] = None
