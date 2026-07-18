@@ -14,6 +14,13 @@ class UsuarioModel(models.Model):
         choices=EstadosUsuario.CHOICES,
         default=EstadosUsuario.ACTIVO,
     )
+    from shared.constants import EstadosSeguridadUsuario
+    estado_seguridad = models.CharField(
+        max_length=40,
+        choices=EstadosSeguridadUsuario.CHOICES,
+        default=EstadosSeguridadUsuario.NORMAL,
+    )
+    password_changed_at = models.DateTimeField(null=True, blank=True)
     intentos_fallidos = models.PositiveSmallIntegerField(default=0)
     ultimo_acceso = models.DateTimeField(null=True, blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)

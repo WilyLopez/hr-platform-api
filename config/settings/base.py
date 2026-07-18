@@ -48,6 +48,7 @@ LOCAL_APPS = [
     'modules.solicitud',
     'modules.auditoria',
     'modules.notificacion',
+    'modules.horario',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -127,6 +128,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
+        'shared.infrastructure.permissions.RequirePasswordChangePermission',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -203,6 +205,7 @@ MIGRATION_MODULES = {
     'auditoria': 'modules.auditoria.infrastructure.migrations',
     'notificacion': 'modules.notificacion.infrastructure.migrations',
     'suscripcion': 'modules.suscripcion.infrastructure.migrations',
+    'horario': 'modules.horario.infrastructure.migrations',
 }
 
 # SUNAT API

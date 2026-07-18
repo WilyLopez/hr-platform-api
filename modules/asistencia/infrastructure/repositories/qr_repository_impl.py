@@ -30,6 +30,8 @@ class DjangoQrRepository(QrRepository):
         model.empresa_id = token_qr.empresa_id
         model.sede_id = token_qr.sede_id
         model.token = token_qr.token
+        model.nonce = token_qr.nonce
+        model.firma = token_qr.firma
         model.expira_en = token_qr.expira_en
         model.es_activo = token_qr.es_activo
         model.save()
@@ -37,7 +39,7 @@ class DjangoQrRepository(QrRepository):
         token_qr.id = model.pk
         return token_qr
 
-    def invalidar_por_sede(self, sede_id: int) -> None:
+    def desactivar_por_sede(self, sede_id: int) -> None:
         TokenQrModel.objects.filter(sede_id=sede_id, es_activo=True).update(es_activo=False)
 
     def _to_entity(self, model: TokenQrModel) -> TokenQr:
@@ -46,6 +48,8 @@ class DjangoQrRepository(QrRepository):
             empresa_id=model.empresa_id,
             sede_id=model.sede_id,
             token=model.token,
+            nonce=model.nonce,
+            firma=model.firma,
             expira_en=model.expira_en,
             es_activo=model.es_activo,
             fecha_creacion=model.fecha_creacion,

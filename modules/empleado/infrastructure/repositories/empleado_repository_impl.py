@@ -20,6 +20,12 @@ class DjangoEmpleadoRepository(EmpleadoRepository):
         except EmpleadoModel.DoesNotExist:
             return None
 
+    def get_by_usuario_id(self, usuario_id: int) -> Optional[Empleado]:
+        try:
+            return self._to_entity(EmpleadoModel.objects.get(usuario_id=usuario_id))
+        except EmpleadoModel.DoesNotExist:
+            return None
+
     def exists_by_codigo_unico(self, codigo: str) -> bool:
         return EmpleadoModel.objects.filter(codigo_unico=codigo).exists()
 

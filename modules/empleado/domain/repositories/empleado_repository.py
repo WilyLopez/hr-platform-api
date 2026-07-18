@@ -13,6 +13,10 @@ class EmpleadoRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def get_by_usuario_id(self, usuario_id: int) -> Optional[Empleado]:
+        raise NotImplementedError
+
+    @abstractmethod
     def get_by_empresa(
         self,
         empresa_id: int,

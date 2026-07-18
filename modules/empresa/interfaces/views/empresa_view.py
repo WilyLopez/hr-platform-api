@@ -39,6 +39,10 @@ def _build_registrar_use_case():
         def notificar_registro_empresa(self, correo, empresa):
             self._svc.notificar_registro_empresa(correo, empresa.razon_social)
 
+        def notificar_credenciales_propietario(self, correo, codigo_unico, contrasena):
+            """Envía el email con código único y contraseña al nuevo propietario."""
+            self._svc.notificar_bienvenida_empleado(correo, codigo_unico, contrasena)
+
     class _UsuarioAdapter:
         def crear_propietario(self, empresa_id, correo, contrasena):
             from modules.usuario.application.use_cases.crear_usuario import CrearUsuarioUseCase
@@ -49,10 +53,12 @@ def _build_registrar_use_case():
                 password_service=PasswordService(),
                 auditoria_use_case=RegistrarEventoUseCase(DjangoAuditoriaRepository()),
             )
-            uc.execute(CrearUsuarioInputDTO(
+            resultado = uc.execute(CrearUsuarioInputDTO(
                 empresa_id=empresa_id, rol_nombre="PROPIETARIO",
                 correo=correo, contrasena=contrasena,
             ))
+            # Retornar el codigo_unico generado para poder notificar al propietario
+            return resultado.codigo_unico
 
     class _SuscripcionAdapter:
         def activar_trial(self, empresa_id, plan_id):
@@ -87,13 +93,21 @@ class ReactivarEmpresaView(APIView):
             return Response({"error": "Solo el superadmin puede reactivar empresas"}, status=403)
             
         from modules.empresa.infrastructure.repositories.empresa_repository_impl import DjangoEmpresaRepository
-        repo = DjangoEmpresaRepository()
-        empresa = repo.get_by_id(empresa_id)
-        if not empresa:
-            return Response({"error": "Empresa no encontrada"}, status=404)
-            
-        empresa.activar()
-        repo.save(empresa)
+        from modules.auditoria.infrastructure.repositories.auditoria_repository_impl import DjangoAuditoriaRepository
+        from modules.auditoria.application.use_cases.registrar_evento import RegistrarEventoUseCase
+        from modules.empresa.application.use_cases.reactivar_empresa import ReactivarEmpresaUseCase
+
+        use_case = ReactivarEmpresaUseCase(
+            DjangoEmpresaRepository(),
+            RegistrarEventoUseCase(DjangoAuditoriaRepository()),
+        )
+        use_case.execute({
+            "empresa_id": empresa_id,
+            "reactivado_por_id": request.usuario_id,
+            "motivo_categoria": request.data.get("motivo_categoria", "OTRO"),
+            "comentario": request.data.get("comentario", ""),
+            "ip_address": request.META.get("REMOTE_ADDR"),
+        })
         return Response({"mensaje": "Empresa reactivada exitosamente"})
 
 
@@ -203,16 +217,44 @@ class SuspenderEmpresaView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, empresa_id):
+        if request.rol != "SUPERADMIN":
+            return Response({"error": "Solo el superadmin puede suspender empresas"}, status=403)
+
         from modules.auditoria.infrastructure.repositories.auditoria_repository_impl import DjangoAuditoriaRepository
         from modules.auditoria.application.use_cases.registrar_evento import RegistrarEventoUseCase
+        from modules.notificacion.infrastructure.services.email_service import EmailService
+
         use_case = SuspenderEmpresaUseCase(
             DjangoEmpresaRepository(),
+            DjangoSuscripcionRepository(),
             RegistrarEventoUseCase(DjangoAuditoriaRepository()),
+            EmailService()
         )
-        use_case.execute({
-            "empresa_id": empresa_id,
-            "suspendido_por_id": request.usuario_id,
-            "razon": request.data.get("razon", ""),
-            "ip_address": request.META.get("REMOTE_ADDR"),
-        })
-        return Response({"status": "ok"})
+        
+        # Recuperar correo del propietario principal para la notificacion si es posible
+        # (Esto es un nice to have, si lo mandamos desde el front o lo consultamos aqui)
+        propietario_email = request.data.get("propietario_email", None)
+
+        from shared.domain.exceptions import DomainException
+
+        try:
+            use_case.execute({
+                "empresa_id": empresa_id,
+                "suspendido_por_id": request.usuario_id,
+                "motivo_categoria": request.data.get("motivo_categoria", "OTRO"),
+                "comentario": request.data.get("comentario", ""),
+                "propietario_email": propietario_email,
+                "ip_address": request.META.get("REMOTE_ADDR"),
+            })
+            return Response({"status": "ok"})
+        except DomainException as e:
+            return Response({"error": getattr(e, "message", str(e)), "code": getattr(e, "code", "domain_error")}, status=400)
+        except Exception as e:
+            import traceback
+            tb = traceback.format_exc()
+            try:
+                with open(r"C:\Users\ENTERCORE\.gemini\antigravity\scratch\error_log.txt", "w") as f:
+                    f.write(tb)
+            except:
+                pass
+            return Response({"error": "Ocurrió un error interno", "details": str(e), "traceback": tb}, status=500)

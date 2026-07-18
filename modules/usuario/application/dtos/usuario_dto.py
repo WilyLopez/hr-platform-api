@@ -9,6 +9,8 @@ class CrearUsuarioInputDTO:
     rol_nombre: str
     correo: str
     contrasena: str
+    codigo_unico: Optional[str] = None
+    requiere_cambio_password: bool = False
 
 
 @dataclass
@@ -40,3 +42,4 @@ class UsuarioOutputDTO:
     estado: str
     ultimo_acceso: Optional[datetime]
     fecha_creacion: datetime
+    nombre_completo: Optional[str] = None

@@ -17,5 +17,5 @@ class QrRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def invalidar_por_sede(self, sede_id: int) -> None:
+    def desactivar_por_sede(self, sede_id: int) -> None:
         raise NotImplementedError

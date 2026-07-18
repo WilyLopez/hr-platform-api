@@ -23,12 +23,35 @@ class EstadosEmpresa:
     SUSPENDIDA = "SUSPENDIDA"
     EN_PRUEBA = "EN_PRUEBA"
     ELIMINADA = "ELIMINADA"
+    CANCELADA = "CANCELADA"
+    BLOQUEADA = "BLOQUEADA"
+    EN_REVISION = "EN_REVISION"
 
     CHOICES = [
         (ACTIVA, "Activa"),
         (SUSPENDIDA, "Suspendida"),
         (EN_PRUEBA, "En periodo de prueba"),
         (ELIMINADA, "Eliminada"),
+        (CANCELADA, "Cancelada"),
+        (BLOQUEADA, "Bloqueada"),
+        (EN_REVISION, "En revisión"),
+    ]
+
+class CategoriasMotivo:
+    FALTA_PAGO = "FALTA_PAGO"
+    SOLICITUD_CLIENTE = "SOLICITUD_CLIENTE"
+    INCUMPLIMIENTO_TERMINOS = "INCUMPLIMIENTO_TERMINOS"
+    FRAUDE = "FRAUDE"
+    DUPLICADO = "DUPLICADO"
+    OTRO = "OTRO"
+
+    CHOICES = [
+        (FALTA_PAGO, "Falta de pago"),
+        (SOLICITUD_CLIENTE, "Solicitud del cliente"),
+        (INCUMPLIMIENTO_TERMINOS, "Incumplimiento de términos"),
+        (FRAUDE, "Fraude"),
+        (DUPLICADO, "Duplicado"),
+        (OTRO, "Otro"),
     ]
 
 
@@ -44,6 +67,20 @@ class EstadosUsuario:
     ]
 
 
+class EstadosSeguridadUsuario:
+    NORMAL = "NORMAL"
+    PASSWORD_CHANGE_REQUIRED = "PASSWORD_CHANGE_REQUIRED"
+    PASSWORD_EXPIRED = "PASSWORD_EXPIRED"
+    ACCOUNT_LOCKED = "ACCOUNT_LOCKED"
+
+    CHOICES = [
+        (NORMAL, "Normal"),
+        (PASSWORD_CHANGE_REQUIRED, "Cambio de contraseña requerido"),
+        (PASSWORD_EXPIRED, "Contraseña expirada"),
+        (ACCOUNT_LOCKED, "Cuenta bloqueada"),
+    ]
+
+
 class EstadosEmpleado:
     ACTIVO = "ACTIVO"
     INACTIVO = "INACTIVO"
@@ -56,21 +93,63 @@ class EstadosEmpleado:
 
 class TiposMarcaje:
     ENTRADA = "ENTRADA"
+    INICIO_REFRIGERIO = "INICIO_REFRIGERIO"
+    FIN_REFRIGERIO = "FIN_REFRIGERIO"
     SALIDA = "SALIDA"
 
     CHOICES = [
         (ENTRADA, "Entrada"),
+        (INICIO_REFRIGERIO, "Inicio de refrigerio"),
+        (FIN_REFRIGERIO, "Fin de refrigerio"),
         (SALIDA, "Salida"),
     ]
 
 
-class MetodosMarcaje:
-    QR = "QR"
-    MANUAL = "MANUAL"
+class EstadosAuditoriaMarcaje:
+    VALIDO = "VALIDO"
+    CORREGIDO = "CORREGIDO"
+    RECHAZADO = "RECHAZADO"
+    PENDIENTE_APROBACION = "PENDIENTE_APROBACION"
 
     CHOICES = [
+        (VALIDO, "Válido"),
+        (CORREGIDO, "Corregido"),
+        (RECHAZADO, "Rechazado"),
+        (PENDIENTE_APROBACION, "Pendiente de aprobación"),
+    ]
+
+
+class ResultadosMarcaje:
+    NORMAL = "NORMAL"
+    TARDE = "TARDE"
+    TEMPRANO = "TEMPRANO"
+    EXTRA = "EXTRA"
+    FALTA = "FALTA"
+    FUERA_HORARIO = "FUERA_HORARIO"
+
+    CHOICES = [
+        (NORMAL, "Normal"),
+        (TARDE, "Tarde"),
+        (TEMPRANO, "Temprano"),
+        (EXTRA, "Extra"),
+        (FALTA, "Falta"),
+        (FUERA_HORARIO, "Fuera de horario"),
+    ]
+
+
+class OrigenMarcaje:
+    WEB = "WEB"
+    QR = "QR"
+    MOVIL = "MOVIL"
+    MANUAL = "MANUAL"
+    API = "API"
+
+    CHOICES = [
+        (WEB, "Web"),
         (QR, "Código QR"),
+        (MOVIL, "App Móvil"),
         (MANUAL, "Registro manual"),
+        (API, "Sistema/API"),
     ]
 
 
@@ -96,6 +175,46 @@ class EstadosSolicitud:
         RECHAZADA: set(),
         CANCELADA: set(),
     }
+
+
+class EstadosHorasExtras:
+    NO_REQUIERE = "NO_REQUIERE"
+    PENDIENTE = "PENDIENTE"
+    APROBADA = "APROBADA"
+    RECHAZADA = "RECHAZADA"
+
+    CHOICES = [
+        (NO_REQUIERE, "No requiere"),
+        (PENDIENTE, "Pendiente"),
+        (APROBADA, "Aprobada"),
+        (RECHAZADA, "Rechazada"),
+    ]
+
+
+class EstadosAsistenciaHoy:
+    PRESENTE = "PRESENTE"
+    TRABAJANDO = "TRABAJANDO"
+    DE_PERMISO = "DE_PERMISO"
+    VACACIONES = "VACACIONES"
+    DESCANSO = "DESCANSO"
+    FALTA = "FALTA"
+    SIN_HORARIO = "SIN_HORARIO"
+    SIN_MARCAR = "SIN_MARCAR"
+    FINALIZADO = "FINALIZADO"
+    EN_REFRIGERIO = "EN_REFRIGERIO"
+
+    CHOICES = [
+        (PRESENTE, "Presente"),
+        (TRABAJANDO, "Trabajando"),
+        (DE_PERMISO, "De Permiso"),
+        (VACACIONES, "Vacaciones"),
+        (DESCANSO, "Día de Descanso"),
+        (FALTA, "Falta"),
+        (SIN_HORARIO, "Sin Horario"),
+        (SIN_MARCAR, "Sin Marcar"),
+        (FINALIZADO, "Finalizado"),
+        (EN_REFRIGERIO, "En Refrigerio"),
+    ]
 
 
 class PlanesNombre:

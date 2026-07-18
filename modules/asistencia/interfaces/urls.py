@@ -3,7 +3,9 @@ from modules.asistencia.interfaces.views.asistencia_view import (
     MarcajeView,
     AsistenciaManualView,
     ReporteAsistenciaView,
-    AsistenciaListView
+    AsistenciaListView,
+    EstadoAsistenciaHoyView,
+    AprobarHorasExtrasView,
 )
 from modules.asistencia.interfaces.views.qr_view import GenerarQrView
 
@@ -12,5 +14,7 @@ urlpatterns = [
     path("marcaje/", MarcajeView.as_view()),
     path("manual/", AsistenciaManualView.as_view()),
     path("reporte/", ReporteAsistenciaView.as_view()),
+    path("estado-hoy/", EstadoAsistenciaHoyView.as_view()),
     path("qr/<int:sede_id>/", GenerarQrView.as_view()),
+    path("<int:registro_id>/extras/", AprobarHorasExtrasView.as_view()),
 ]

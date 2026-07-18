@@ -27,24 +27,11 @@ class DjangoAsistenciaRepository(AsistenciaRepository):
         if fecha_hasta:
             qs = qs.filter(timestamp__date__lte=fecha_hasta)
         offset = (page - 1) * page_size
-        return [self._to_entity(m) for m in qs.order_by("-timestamp")[offset: offset + page_size]]
+        return [self._to_entity(m) for m in qs.order_by("timestamp")[offset: offset + page_size]]
 
-    def get_by_empresa(
-        self,
-        empresa_id: int,
-        fecha: Optional[date] = None,
-        sede_id: Optional[int] = None,
-        area: Optional[str] = None,
-        page: int = 1,
-        page_size: int = 20,
-    ) -> List[RegistroAsistencia]:
-        qs = RegistroAsistenciaModel.objects.filter(empresa_id=empresa_id)
-        if fecha:
-            qs = qs.filter(timestamp__date=fecha)
-        if sede_id:
-            qs = qs.filter(sede_id=sede_id)
-        offset = (page - 1) * page_size
-        return [self._to_entity(m) for m in qs.order_by("-timestamp")[offset: offset + page_size]]
+    def get_marcajes_del_dia(self, empleado_id: int, fecha: date) -> List[RegistroAsistencia]:
+        qs = RegistroAsistenciaModel.objects.filter(empleado_id=empleado_id, timestamp__date=fecha).order_by("timestamp")
+        return [self._to_entity(m) for m in qs]
 
     def get_ultimo_marcaje_del_dia(self, empleado_id: int, fecha: date) -> Optional[RegistroAsistencia]:
         model = (
@@ -60,6 +47,26 @@ class DjangoAsistenciaRepository(AsistenciaRepository):
             empleado_id=empleado_id, tipo=tipo, timestamp__date=fecha
         ).exists()
 
+    def get_by_empresa(
+        self,
+        empresa_id: int,
+        fecha: Optional[date] = None,
+        sede_id: Optional[int] = None,
+        area: Optional[str] = None,
+        solo_extras: bool = False,
+        page: int = 1,
+        page_size: int = 20,
+    ) -> List[RegistroAsistencia]:
+        qs = RegistroAsistenciaModel.objects.filter(empresa_id=empresa_id)
+        if fecha:
+            qs = qs.filter(timestamp__date=fecha)
+        if sede_id:
+            qs = qs.filter(sede_id=sede_id)
+        if solo_extras:
+            qs = qs.filter(minutos_extra__gt=0)
+        offset = (page - 1) * page_size
+        return [self._to_entity(m) for m in qs.order_by("-timestamp")[offset: offset + page_size]]
+
     def save(self, registro: RegistroAsistencia) -> RegistroAsistencia:
         if registro.id:
             model = RegistroAsistenciaModel.objects.get(pk=registro.id)
@@ -70,12 +77,23 @@ class DjangoAsistenciaRepository(AsistenciaRepository):
         model.empleado_id = registro.empleado_id
         model.sede_id = registro.sede_id
         model.tipo = registro.tipo
-        model.metodo = registro.metodo
+        model.origen = registro.origen
         model.latitud = registro.coordenadas.latitud if registro.coordenadas else None
         model.longitud = registro.coordenadas.longitud if registro.coordenadas else None
-        model.es_tardanza = registro.es_tardanza
-        model.es_manual = registro.es_manual
-        model.justificacion_manual = registro.justificacion_manual
+        model.estado_auditoria = registro.estado_auditoria
+        model.resultado = registro.resultado
+        model.minutos_tardanza = registro.minutos_tardanza
+        model.minutos_extra = registro.minutos_extra
+        model.minutos_temprano = registro.minutos_temprano
+        model.horas_trabajadas = registro.horas_trabajadas
+        model.nivel_confianza = registro.nivel_confianza
+        model.estado_extras = registro.estado_extras
+        model.minutos_extra_aprobados = registro.minutos_extra_aprobados
+        model.enviado_a_nomina = registro.enviado_a_nomina
+        model.extras_evaluado_por_id = registro.extras_evaluado_por_id
+        model.extras_fecha_evaluacion = registro.extras_fecha_evaluacion
+        model.extras_comentario = registro.extras_comentario
+        model.observaciones = registro.observaciones
         model.timestamp = registro.timestamp
         model.save()
 
@@ -105,11 +123,22 @@ class DjangoAsistenciaRepository(AsistenciaRepository):
             empleado_id=model.empleado_id,
             sede_id=model.sede_id,
             tipo=model.tipo,
-            metodo=model.metodo,
+            origen=model.origen,
             coordenadas=coordenadas,
-            es_tardanza=model.es_tardanza,
-            es_manual=model.es_manual,
-            justificacion_manual=model.justificacion_manual,
+            estado_auditoria=model.estado_auditoria,
+            resultado=model.resultado,
+            minutos_tardanza=model.minutos_tardanza,
+            minutos_extra=model.minutos_extra,
+            minutos_temprano=model.minutos_temprano,
+            horas_trabajadas=float(model.horas_trabajadas),
+            nivel_confianza=model.nivel_confianza,
+            estado_extras=model.estado_extras,
+            minutos_extra_aprobados=model.minutos_extra_aprobados,
+            enviado_a_nomina=model.enviado_a_nomina,
+            extras_evaluado_por_id=model.extras_evaluado_por_id,
+            extras_fecha_evaluacion=model.extras_fecha_evaluacion,
+            extras_comentario=model.extras_comentario,
+            observaciones=model.observaciones,
             timestamp=model.timestamp,
             fecha_creacion=model.fecha_creacion,
         )

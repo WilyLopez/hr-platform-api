@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.exceptions import ValidationError
 
 from modules.usuario.interfaces.serializers.auth_serializer import (
     LoginSerializer,
@@ -31,22 +32,29 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        d = serializer.validated_data
-        use_case = AutenticarUsuarioUseCase(
-            usuario_repository=DjangoUsuarioRepository(),
-            rol_repository=DjangoRolRepository(),
-            password_service=PasswordService(),
-            jwt_service=JwtService(),
-            auditoria_use_case=_auditoria(),
-        )
-        output = use_case.execute(AutenticarUsuarioInputDTO(
-            codigo_unico=d["codigo_unico"],
-            contrasena=d["contrasena"],
-            ip_address=request.META.get("REMOTE_ADDR", ""),
-        ))
-        return Response(TokenOutputSerializer(output).data)
+        try:
+            serializer = LoginSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            d = serializer.validated_data
+            use_case = AutenticarUsuarioUseCase(
+                usuario_repository=DjangoUsuarioRepository(),
+                rol_repository=DjangoRolRepository(),
+                password_service=PasswordService(),
+                jwt_service=JwtService(),
+                auditoria_use_case=_auditoria(),
+            )
+            output = use_case.execute(AutenticarUsuarioInputDTO(
+                codigo_unico=d["codigo_unico"],
+                contrasena=d["contrasena"],
+                ip_address=request.META.get("REMOTE_ADDR", ""),
+            ))
+            return Response(TokenOutputSerializer(output).data)
+        except Exception as e:
+            if not isinstance(e, ValidationError):
+                import traceback
+                with open(r"C:\Users\ENTERCORE\.gemini\antigravity\scratch\error_log_login.txt", "w") as f:
+                    f.write(traceback.format_exc())
+            raise
 
 
 class RefrescarTokenView(APIView):

@@ -33,7 +33,10 @@ class RegistrarEmpleadoUseCase(BaseUseCase[RegistrarEmpleadoInputDTO, EmpleadoOu
             raise EmpleadoYaExisteException("correo", input_dto.correo)
 
         codigo_unico = self._generar_codigo_unico()
-        usuario = self._usuario_use_case.crear_empleado(input_dto.empresa_id, input_dto.correo, codigo_unico)
+        import secrets, string
+        contrasena = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+        
+        usuario = self._usuario_use_case.crear_empleado(input_dto.empresa_id, input_dto.correo, codigo_unico, contrasena)
 
         empleado = Empleado(
             id=None,
@@ -58,6 +61,7 @@ class RegistrarEmpleadoUseCase(BaseUseCase[RegistrarEmpleadoInputDTO, EmpleadoOu
         self._notificacion_use_case.notificar_bienvenida_empleado(
             correo=input_dto.correo,
             codigo_unico=str(codigo_unico),
+            contrasena=contrasena,
         )
         self._auditoria_use_case.registrar(
             empresa_id=input_dto.empresa_id,

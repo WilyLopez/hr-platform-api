@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils import timezone
 from shared.application.base_use_case import BaseUseCase
 from modules.suscripcion.domain.repositories.suscripcion_repository import SuscripcionRepository
 from modules.suscripcion.domain.repositories.plan_repository import PlanRepository
@@ -38,13 +39,14 @@ class CambiarPlanUseCase(BaseUseCase[CambiarPlanInputDTO, SuscripcionOutputDTO])
         suscripcion.plan_id = nuevo_plan.id
         suscripcion.plan_nombre = nuevo_plan.nombre
         suscripcion.plan_limite_usuarios = nuevo_plan.limite_usuarios
-        suscripcion.fecha_proxima_facturacion = datetime.now() + timedelta(days=30)
-        suscripcion.fecha_actualizacion = datetime.now()
+        suscripcion.estado = "ACTIVA"
+        suscripcion.fecha_proxima_facturacion = timezone.now() + timedelta(days=30)
+        suscripcion.fecha_actualizacion = timezone.now()
 
         suscripcion = self._suscripcion_repository.save(suscripcion)
         dias_restantes = None
         if suscripcion.fecha_fin_trial:
-            dias_restantes = (suscripcion.fecha_fin_trial - datetime.now()).days
+            dias_restantes = (suscripcion.fecha_fin_trial - timezone.now()).days
 
         return SuscripcionOutputDTO(
             id=suscripcion.id,

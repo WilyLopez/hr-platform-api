@@ -10,6 +10,11 @@ class AutenticarUsuarioInputDTO:
 
 
 @dataclass
+class TokenSecurityDTO:
+    must_change_password: bool
+
+
+@dataclass
 class TokenOutputDTO:
     access: str
     refresh: str
@@ -17,6 +22,7 @@ class TokenOutputDTO:
     codigo_unico: str
     empresa_id: Optional[int]
     rol: str
+    security: TokenSecurityDTO
 
 
 @dataclass

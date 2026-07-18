@@ -67,6 +67,8 @@ class ListarSolicitudesUseCase(BaseUseCase[ListarSolicitudesInputDTO, List[Solic
                     tipo_permiso_nombre=tipo_permiso,
                     fecha_inicio=s.fecha_inicio,
                     fecha_fin=s.fecha_fin,
+                    hora_inicio=s.hora_inicio.strftime('%H:%M') if getattr(s, 'hora_inicio', None) else None,
+                    hora_fin=s.hora_fin.strftime('%H:%M') if getattr(s, 'hora_fin', None) else None,
                     dias_solicitados=dias,
                     motivo=s.motivo,
                     estado=s.estado,
@@ -80,8 +82,6 @@ class ListarSolicitudesUseCase(BaseUseCase[ListarSolicitudesInputDTO, List[Solic
                 import traceback
                 print(f"❌ ERROR AL MAPEAR SOLICITUD ID {getattr(s, 'id', 'Desconocido')}: {str(e)}")
                 traceback.print_exc()
-                # Opcional: puedes hacer 'raise e' si quieres que el 500 siga apareciendo,
-                # o dejar que continúe con el siguiente registro ignorando el que falló.
                 raise e
 
         return resultado

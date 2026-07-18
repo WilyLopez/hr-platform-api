@@ -14,12 +14,10 @@ class ConfigurarGeovallaUseCase(BaseUseCase[ActualizarSedeInputDTO, SedeOutputDT
         if not sede or sede.empresa_id != input_dto.empresa_id:
             raise SedeNoEncontradaException(str(input_dto.sede_id))
 
-        sede.actualizar(
-            nombre=input_dto.nombre,
-            direccion=input_dto.direccion,
-            coordenadas=Coordenadas(input_dto.latitud, input_dto.longitud),
-            radio_metros=RadioMetros(input_dto.radio_metros),
-        )
+        sede.nombre = input_dto.nombre
+        sede.direccion = input_dto.direccion
+        sede.coordenadas = Coordenadas(input_dto.latitud, input_dto.longitud)
+        sede.radio_metros = RadioMetros(input_dto.radio_metros)
 
         sede = self._sede_repository.save(sede)
 

@@ -29,10 +29,11 @@ class GenerarQrUseCase(BaseUseCase[GenerarQrInputDTO, QrOutputDTO]):
         token_qr = TokenQr.crear(input_dto.empresa_id, input_dto.sede_id, minutos)
         token_qr = self._qr_repository.save(token_qr)
 
-        imagen_base64 = self._qr_generator_service.generar_imagen(token_qr.token)
+        cadena_qr = f"{token_qr.token}:{token_qr.nonce}:{token_qr.firma}"
+        imagen_base64 = self._qr_generator_service.generar_imagen(cadena_qr)
 
         return QrOutputDTO(
-            token=token_qr.token,
+            token=cadena_qr,
             sede_id=sede.id,
             sede_nombre=sede.nombre,
             expira_en=token_qr.expira_en,

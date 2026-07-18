@@ -18,6 +18,10 @@ class LoginSerializer(BaseSerializer):
     contrasena = serializers.CharField(write_only=True)
 
 
+class TokenSecuritySerializer(serializers.Serializer):
+    must_change_password = serializers.BooleanField()
+
+
 class TokenOutputSerializer(BaseSerializer):
     access = serializers.CharField()
     refresh = serializers.CharField()
@@ -25,6 +29,7 @@ class TokenOutputSerializer(BaseSerializer):
     codigo_unico = serializers.CharField()
     empresa_id = serializers.IntegerField(allow_null=True)
     rol = serializers.CharField()
+    security = TokenSecuritySerializer()
 
 
 class RefrescarTokenSerializer(BaseSerializer):

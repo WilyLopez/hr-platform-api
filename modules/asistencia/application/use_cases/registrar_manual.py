@@ -1,6 +1,6 @@
 from datetime import datetime
 from shared.application.base_use_case import BaseUseCase
-from shared.constants import MetodosMarcaje, TiposEvento
+from shared.constants import OrigenMarcaje, TiposEvento
 from modules.asistencia.domain.entities.registro_asistencia import RegistroAsistencia
 from modules.asistencia.domain.repositories.asistencia_repository import AsistenciaRepository
 from modules.empleado.domain.repositories.empleado_repository import EmpleadoRepository
@@ -42,7 +42,7 @@ class RegistrarManualUseCase(BaseUseCase[RegistrarManualInputDTO, RegistroAsiste
             empleado_id=input_dto.empleado_id,
             sede_id=empleado.sede_id,
             tipo=input_dto.tipo,
-            metodo=MetodosMarcaje.MANUAL,
+            origen=OrigenMarcaje.MANUAL,
             coordenadas=None,
             es_tardanza=False,
             es_manual=True,

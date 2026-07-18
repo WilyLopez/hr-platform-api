@@ -56,6 +56,9 @@ class AutenticarUsuarioUseCase(BaseUseCase[AutenticarUsuarioInputDTO, TokenOutpu
             detalles={},
         )
 
+        from shared.constants import EstadosSeguridadUsuario
+        from modules.usuario.application.dtos.token_dto import TokenSecurityDTO
+
         return TokenOutputDTO(
             access=tokens["access"],
             refresh=tokens["refresh"],
@@ -63,4 +66,7 @@ class AutenticarUsuarioUseCase(BaseUseCase[AutenticarUsuarioInputDTO, TokenOutpu
             codigo_unico=str(usuario.codigo_unico),
             empresa_id=usuario.empresa_id,
             rol=rol.nombre,
+            security=TokenSecurityDTO(
+                must_change_password=usuario.estado_seguridad == EstadosSeguridadUsuario.PASSWORD_CHANGE_REQUIRED
+            )
         )
