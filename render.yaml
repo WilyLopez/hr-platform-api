@@ -16,9 +16,16 @@ services:
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health/
     # El Dockerfile solo arranca Gunicorn (las migraciones se manejan aparte
-    # en docker-compose y en el initContainer de Kubernetes); en Render se
-    # ejecutan aqui, una vez, antes de cada despliegue.
-    preDeployCommand: python manage.py migrate --noinput
+    # en docker-compose y en el initContainer de Kubernetes). preDeployCommand
+    # no esta disponible en el plan free de Render, asi que aqui se sobrescribe
+    # el comando de arranque para migrar y despues levantar Gunicorn, igual
+    # que hace el "command:" del servicio backend en docker-compose.yml.
+    startCommand: >-
+      sh -c "python manage.py migrate --noinput &&
+      gunicorn config.asgi:application
+      --worker-class uvicorn.workers.UvicornWorker
+      --workers 4 --bind 0.0.0.0:8000 --timeout 120
+      --access-logfile - --error-logfile -"
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
