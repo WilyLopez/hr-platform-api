@@ -1,0 +1,4 @@
+# Los scripts de shell deben mantener siempre saltos de linea LF, incluso
+# si se clonan/editan desde Windows: con CRLF fallan dentro del contenedor
+# Linux (por ejemplo, un shebang "#!/bin/sh\r" no se reconoce).
+*.sh text eol=lf
