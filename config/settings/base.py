@@ -55,6 +55,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -156,6 +157,10 @@ SIMPLE_JWT = {
 # CORS
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=['http://localhost:3000'])
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF: dominios externos (frontend en Vercel, backend en Render) que pueden
+# enviar POST/PUT/DELETE con cookies de sesion (por ejemplo, el admin de Django).
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
 
 # Channels
 CHANNEL_LAYERS = {

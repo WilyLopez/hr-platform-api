@@ -1,0 +1,42 @@
+# Blueprint de Render: define el servicio web (construido desde el Dockerfile
+# de este mismo repositorio) y la base de datos PostgreSQL gratuita.
+# Ver hr-platform-web/docs/DESPLIEGUE_RENDER_VERCEL.md para la guia paso a paso.
+
+databases:
+  - name: nexushr-db
+    plan: free
+    databaseName: nexushr
+    user: nexushr
+
+services:
+  - type: web
+    name: hr-platform-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health/
+    # El Dockerfile solo arranca Gunicorn (las migraciones se manejan aparte
+    # en docker-compose y en el initContainer de Kubernetes); en Render se
+    # ejecutan aqui, una vez, antes de cada despliegue.
+    preDeployCommand: python manage.py migrate --noinput
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nexushr-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: hr-platform-api.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.console.EmailBackend

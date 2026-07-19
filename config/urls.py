@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from shared.interfaces.health import health_check
 
 api_v1_patterns = [
     path('auth/', include('modules.usuario.interfaces.urls')),
@@ -16,6 +17,7 @@ api_v1_patterns = [
 ]
 
 urlpatterns = [
+    path('health/', health_check, name='health-check'),
     path('admin/', admin.site.urls),
     path('api/v1/', include(api_v1_patterns)),
 ]
