@@ -1,0 +1,1 @@
+from .notificacion_model import NotificacionModel
