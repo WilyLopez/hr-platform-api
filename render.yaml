@@ -35,7 +35,13 @@ services:
           name: nexushr-db
           property: connectionString
       - key: ALLOWED_HOSTS
-        value: hr-platform-api.onrender.com
+        # Render revisa la salud del contenedor pegandole por su IP privada
+        # interna, no por el dominio publico, asi que restringir ALLOWED_HOSTS
+        # a un solo dominio bloquea ese chequeo con 400 (DisallowedHost) y el
+        # servicio nunca queda "Live". Detras del proxy de Render (que ya
+        # valida que el trafico externo llegue enrutado a este servicio) usar
+        # "*" es un tradeoff aceptado y comun en este tipo de despliegues.
+        value: "*"
       - key: CORS_ALLOWED_ORIGINS
         sync: false
       - key: CSRF_TRUSTED_ORIGINS
