@@ -20,7 +20,9 @@ services:
     # no esta disponible en el plan free de Render, asi que aqui se sobrescribe
     # el comando de arranque para migrar y despues levantar Gunicorn, igual
     # que hace el "command:" del servicio backend en docker-compose.yml.
-    startCommand: >-
+    # (Para servicios "runtime: docker", el campo correcto es dockerCommand,
+    # no startCommand, que es solo para runtimes nativos).
+    dockerCommand: >-
       sh -c "python manage.py migrate --noinput &&
       gunicorn config.asgi:application
       --worker-class uvicorn.workers.UvicornWorker
